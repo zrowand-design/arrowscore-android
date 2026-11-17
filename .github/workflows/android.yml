@@ -1,0 +1,44 @@
+
+name: Build ArrowScore Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ArrowScore_CloudBuild.zip'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          mkdir extracted
+          unzip -q ArrowScore_CloudBuild.zip -d extracted
+          PROJECT_DIR="$(dirname "$(find extracted -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build Android app
+        run: gradle assembleDebug
+        working-directory: ${{ env.PROJECT_DIR }}
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArrowScore-APK
+          path: '**/build/outputs/apk/debug/*.apk'
