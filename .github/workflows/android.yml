@@ -34,6 +34,33 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Align Kotlin JVM target
+        working-directory: ${{ env.PROJECT_DIR }}
+        shell: bash
+        run: |
+          if [ -f app/build.gradle.kts ]; then
+            cat >> app/build.gradle.kts <<'EOF'
+
+          tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+              kotlinOptions {
+                  jvmTarget = "1.8"
+              }
+          }
+          EOF
+          elif [ -f app/build.gradle ]; then
+            cat >> app/build.gradle <<'EOF'
+
+          tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+              kotlinOptions {
+                  jvmTarget = "1.8"
+              }
+          }
+          EOF
+          else
+            echo "Could not find app Gradle build file"
+            exit 1
+          fi
+
       - name: Build Android app
         run: gradle assembleDebug
         working-directory: ${{ env.PROJECT_DIR }}
