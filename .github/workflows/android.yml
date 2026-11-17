@@ -1,11 +1,12 @@
 
 name: Build ArrowScore Android APK
 
-on:
+'on':
   workflow_dispatch:
   push:
     paths:
       - 'ArrowScore_CloudBuild.zip'
+      - '.github/workflows/android.yml'
 
 jobs:
   build:
@@ -20,7 +21,7 @@ jobs:
           mkdir extracted
           unzip -q ArrowScore_CloudBuild.zip -d extracted
           PROJECT_DIR="$(dirname "$(find extracted -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -41,4 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ArrowScore-APK
-          path: '**/build/outputs/apk/debug/*.apk'
+          path: 'extracted/**/build/outputs/apk/debug/*.apk'
